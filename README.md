@@ -13,6 +13,8 @@ A curated collection of AI agent use cases across industries, showcasing practic
 - [Contributing](#contributing)
 - [License](#license)
 
+<img width="1472" height="832" alt="image" src="https://github.com/user-attachments/assets/cc520190-6630-4e5f-bf00-5e824eb1b466" />
+
 
 ## 🧠 Introduction
 
