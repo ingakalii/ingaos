@@ -10,8 +10,9 @@
 - [Industry Usecase](#-industry-usecase-mindmap)
 - [Use Case Table](#use-case-table)
 - [Framework Wise UseCase](#framework-wise-usecases)
-- [CrewAI UseCase](#framework-name-crewai)  - [AutoGen UseCase](#framework-name-autogen)
-- [Agno UseCase](#framework-name-agno
+- [CrewAI UseCase](#framework-name-crewai)
+- [AutoGen UseCase](#framework-name-autogen)
+- [Agno UseCase](#framework-name-agno)
 - [Langgraph UseCase](#framework-nam-langgraph)
 - [Contributing](#contributing)
 - [License](#license)
