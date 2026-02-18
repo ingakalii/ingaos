@@ -1,0 +1,86 @@
+version: "3.8"
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__SERVICE__HTTP_PORT=6333
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cee
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Optional: TGI for local LLM serving (heavy)
+  tgi:
+    image: ghcr.io/huggingface/text-generation-inference:latest
+    # NOTE: depends on model mounting/config (see TGI docs). This is optional and may require additional env/volumes
+    ports:
+      - "8080:8080"
+    environment:
+      - MAX_INPUT_LENGTH=2048
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - qdrant
+      - postgres
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/cee
+      - LLM_PROVIDER=none
+    volumes:
+      - ./api:/usr/src/app
+    restart: unless-stopped
+
+  worker:
+    build: ./api
+    command: sh -c "rq worker -u redis://redis:6379 default"
+    depends_on:
+      - api
+      - redis
+      - qdrant
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/cee
+      - LLM_PROVIDER=none
+    volumes:
+      - ./api:/usr/src/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+  pgdata:
